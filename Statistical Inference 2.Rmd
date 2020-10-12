@@ -1,0 +1,88 @@
+---
+title: "Statistical Inference Course Project Part 2"
+author: "Keng Yew Hoe"
+date: "10/13/2020"
+output: pdf_document
+---
+## Overview
+Analyzing the ToothGrowth data in the R datasets package while providing a basic summary of the data and using condifence intervals with hypothesis tests to compare tooth growth by supp and dose.
+
+##1. Load the ToothGrowth data and perform some basic exploratory data analyses
+```{r}
+# Load the ToothGrowth data
+data(ToothGrowth)
+str(ToothGrowth)
+head(ToothGrowth)
+summary(ToothGrowth)
+
+# Perform Exploratory Data Analysis
+library(ggplot2)
+
+#Replacing OJ and VC with Orange Juice and Vitamin C
+ToothGrowth$supp <- as.character(ToothGrowth$supp)
+ToothGrowth$supp[ToothGrowth$supp == "OJ"] <- "Orange Juice"
+ToothGrowth$supp[ToothGrowth$supp == "VC"] <- "Vitamin C"
+
+#Plotting
+ggplot(ToothGrowth, aes(x=factor(dose), y=len)) + 
+  facet_grid(.~supp) +
+  geom_boxplot(aes(fill = supp), show_guide = FALSE) +
+  labs(title="Tooth length along dosage for each type of supplement", 
+    x="Dose (mg/day)",
+    y="Tooth Length")
+g <- ggplot(aes(x = " ", y = len), data = ToothGrowth)
+g + geom_boxplot(aes(fill=supp))+ xlab(" ") +
+        ylab("Tooth Length") + facet_grid(~ dose) + ggtitle("Tooth Length Along Supplement Type")
+
+```
+
+## 2. Basic summary of the data
+Based on the graph, tooth growth increases as dosage increases.It is also shown that orange juice has a higher median tooth length when dosage is 0.5 and 1 mg/day. Both types of supplements have the same median when dosage is 2 mg/day.
+
+## 3. Use confidence intervals & hypothesis tests to compare tooth growth by supplement and dose
+### Hypothesis 1
+Orange juice & Vitamin C deliver the same tooth growth across the data set.
+```{r}
+h1<-t.test(len ~ supp, ToothGrowth)
+h1$conf.int
+h1$p.value
+
+```
+The confidence intervals includes 0 and the p-value is greater than the threshold of 0.05.  The null hypothesis cannot be rejected.
+
+### Hypothesis 2
+For the dosage of 0.5 mg/day, the two supplements deliver the same tooth growth.
+```{r}
+h2<-t.test(len ~ supp, subset(ToothGrowth, dose == 0.5))
+h2$conf.int
+h2$p.value
+```
+The confidence interval does not include 0 and the p-value is below the 0.05 threshold. The null hypothesis can be rejected. The alternative hypothesis that 0.5 mg/day dosage of orange juice delivers more tooth growth than Vitamin C is accepted.
+
+### Hypothesis 3
+For the dosage of 1 mg/day, the two supplements deliver the same tooth growth
+```{r}
+h3<-t.test(len ~ supp, data = subset(ToothGrowth, dose == 1))
+h3$conf.int
+h3$p.value
+```
+The confidence interval does not include 0 and the p-value is smaller than the 0.05 threshold. The null hypothesis can be rejected. The alternative hypothesis that 1 mg/day dosage of orange juice delivers more tooth growth than Vitamin C is accepted.
+
+### Hypothesis 4
+For the dosage of 2 mg/day, the two supplements deliver the same tooth growth
+```{r}
+h4<-t.test(len ~ supp, data = subset(ToothGrowth, dose == 2))
+h4$conf.int
+h4$p.value
+```
+The confidence interval does include 0 and the p-value is larger than the 0.05 threshold. The null hypothesis cannot be rejected.
+
+
+## State your conclusions and the assumptions needed for your conclusions
+Orange juice delivers more tooth growth than Vitamin C for dosages 0.5 & 1.0 mg/day. Orange juice and Vitamin C deliver the same amount of tooth growth for dose amount 2.0 mg/day.
+For the entire data set we cannot conclude orange juice is more effective than vitamin C however it can be concluded that dosage will cause an increase in tooth length
+
+Assumptions
+
+* Normal distribution of the tooth lengths
+* No other unmeasured factors are affecting tooth length

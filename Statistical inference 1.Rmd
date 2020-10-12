@@ -1,0 +1,73 @@
+---
+title: "Statistical Inference Course Project Part 1"
+author: "Keng Yew Hoe"
+date: "10/13/2020"
+output: pdf_document
+---
+
+## Overview
+The purpose is to investigate the exponential distribution in R and comparing it with the Central Limit Theorem. The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. with lambda = 0.2 for all the simulations. The investigation compares the distribution of averages of 40 exponentials over a thousand simulations
+
+## Simulations
+For the 1000 simulations, lambda is 0.2 and sample size is 40
+```{r}
+#Set seed to ensure reproducability 
+set.seed(6666)
+
+#Set lambda
+lambda <- 0.2
+
+#Set exponentials
+n <- 40
+
+#Simulating the exponential distribution and getting the mean of 1 simulation 
+simul <- rexp(n,lambda)
+simul
+expMean <- mean(simul)
+expMean
+
+```
+## Sample Mean versus Theoretical Mean
+```{r}
+#Getting the means of each simulations
+simul1000 <- as.data.frame(replicate(1000,mean(rexp(n, lambda))))
+names(simul1000) <- c("sample.mean")
+
+#Calculating the mean of the means of 1000 simulation
+mean1000 <- mean(simul1000$sample.mean)
+mean1000
+
+#The theoretical mean 
+theoMean <- 1/lambda
+theoMean
+```
+The theoretical mean and the experimental mean have a very similar value therefore the center of distribution of sample means of 40 exponential is close to the theoretical center of the distribution
+
+
+## Sample Variance versus Theoretical Variance
+```{r}
+# Calculating the variance of this simulation
+var1000 <- var(simul1000$sample.mean)
+var1000
+
+# The theoretical variance
+theoVariance <- ((1/lambda)^2)/40
+theoVariance
+```
+The variance of the distribution of means have a very similar value to the theoretical variance which is calculated by squaring the standard deviation and dividing by the sample size
+
+## Distribution
+```{r}
+library(ggplot2)
+ggplot(simul1000, aes(x=sample.mean)) +
+    geom_histogram(aes(y = ..density..),colour="black",fill="cyan")+
+    stat_function(fun=dnorm,args=list( mean=mean1000, sd=sqrt(var1000)),geom="line",color = "black", size = 1.0)+
+    ggtitle("Histogram of the 1000 Simulation Samples Means") +
+    scale_x_continuous("Simulation means")+
+    ylab("Density")
+```
+The black curve represents the normal distribution which is used to compare with the histogram.
+The central limit theorem states that the sample means would become that of a standard normal distribution as the sample size increases whilst meeting the two conditions of independence ( n < 10% ) and normal, or if skewed distribution, that n > 30.
+
+* * *
+
